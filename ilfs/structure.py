@@ -25,7 +25,7 @@ def r2(y, p):
     return 1 - np.sum((y - p) ** 2) / np.sum((y - y.mean()) ** 2)
 
 
-def table_s6(s1, n_boot=5000, seed=3):
+def table_s2(s1, n_boot=5000, seed=3):
     f = fixed_anion(s1)
     fam = {k: g for k, g in f.groupby("family")}
     rows = [{"descriptor": "Refined lattice volume, V/anion", "n": len(f),
@@ -51,7 +51,7 @@ def table_s6(s1, n_boot=5000, seed=3):
 
 
 def reference_volumes(s1):
-    """Fig. S11b: V_perfect per anion by reference group."""
+    """Fig. S3b: V_perfect per anion by reference group."""
     g = s1.groupby(["family", "Anion reference group"])["V_perfect/anion (Å³)"]
     return g.agg(["size", "min", "max"]).reset_index()
 

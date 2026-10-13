@@ -48,10 +48,10 @@ def eps_results(s1, em, lg, th, lgssps, bro):
     eps_p = eps_predictor.predict(em, "LGPS-type", lgssps)
     t3 = LGSSPS[["composition"]].assign(eps_exp_pct=100 * LGSSPS.eps_exp, eps_p_pct=100 * eps_p)
     t3["relative error (%)"] = 100 * (t3.eps_p_pct - t3.eps_exp_pct).abs() / t3.eps_exp_pct
-    stats = pd.DataFrame([{"set": "LGSSPS (Table S3)", **regression(LGSSPS.eps_exp, eps_p)}])
+    stats = pd.DataFrame([{"set": "LGSSPS (Table S4)", **regression(LGSSPS.eps_exp, eps_p)}])
     ranges = pd.DataFrame([{"set": k, "eps_p min (%)": 100 * v.min(), "eps_p max (%)": 100 * v.max()} for k, v in (
         ("LGPS-type records", lg.eps), ("thio-LISICON records", th.eps), ("LGSSPS", lgssps.eps), ("LGSSPSBrO", bro.eps))])
-    return {"eps_predictor": perf, "table_s3": t3, "table_s3_stats": stats, "eps_ranges": ranges}
+    return {"eps_predictor": perf, "table_s4": t3, "table_s4_stats": stats, "eps_ranges": ranges}
 
 
 def sigma_results(s1, em, lg, th, lgssps, bro):
@@ -84,7 +84,7 @@ def sigma_results(s1, em, lg, th, lgssps, bro):
     return {"table1": t1, "sigma_predictor_performance": perf}
 
 
-def table_s2():
+def table_s3():
     d = data.data_s2()
     f = d[d.Panels.notna()]
     rows = []
@@ -95,10 +95,10 @@ def table_s2():
             rho, ps = spearmanr(s.eps, s[col])
             rows.append({"family": fam, "property": prop, "n": len(s), "Pearson r": r, "P": pr,
                          "Spearman rho": rho, "P ": ps})
-    return {"table_s2": pd.DataFrame(rows)}
+    return {"table_s3": pd.DataFrame(rows)}
 
 
-def table_s4(s1, em, lg, th, lgssps, bro):
+def table_s5(s1, em, lg, th, lgssps, bro):
     m = SigmaPredictor().fit(lg)
     sp = sigma_mScm(m.predict(lgssps))
     pel = LGSSPS[["sigma_pellet1", "sigma_pellet2"]].values
@@ -109,10 +109,10 @@ def table_s4(s1, em, lg, th, lgssps, bro):
                       "sigma exp sd (mS/cm)": pel.std(axis=1, ddof=1), "sigma pred (mS/cm)": sp,
                       "dlog10 sigma": np.log10(sp) - np.log10(exp)})
     st = pd.DataFrame([{**ranking(sp, exp), "factor": 10 ** np.mean(np.log10(sp / exp))}])
-    return {"table_s4": t, "table_s4_stats": st}
+    return {"table_s5": t, "table_s5_stats": st}
 
 
-def table_s5(s1, em, lg, th, lgssps, bro):
+def table_s6(s1, em, lg, th, lgssps, bro):
     m = SigmaPredictor().fit(lg)
     exp = LGSSPSBRO.sigma_exp.values
     base = sigma_mScm(m.predict(bro))
@@ -140,7 +140,7 @@ def table_s5(s1, em, lg, th, lgssps, bro):
         {"model": "MLP", **ranking(mlp, exp)},
         {"model": "MLP, uniform shift (Si anchor)", **ranking(mlp_shift[o], exp[o]),
          "slope per pp eps_p": slope(mlp_shift)}])
-    return {"table_s5": t, "table_s5_stats": st}
+    return {"table_s6": t, "table_s6_stats": st}
 
 
 def lgssps_bro_entropy(s1, em, lg, th, lgssps, bro):
@@ -194,7 +194,7 @@ def table_s7(s1, em, lg, th, lgssps, bro):
     return {"table_s7": pd.DataFrame(rows), "table_s7_hyperparameters": params}
 
 
-def table_s8(s1, em, lg, th, lgssps, bro):
+def table_s9(s1, em, lg, th, lgssps, bro):
     hw_dft = debye_energy(DFT_B, poisson_ratio(DFT_B, DFT_G))
     variants = {"Default": {}, "Poisson ratio 0.35": {"poisson": 0.35}, "hw0 from DFT moduli": {"hw": hw_dft},
                 "Birch-Murnaghan enthalpy": {"hform": "Birch-Murnaghan"}, "Exact entropy": {"sform": "exact"},
@@ -207,10 +207,10 @@ def table_s8(s1, em, lg, th, lgssps, bro):
         rows.append({"variant": name, "hw0 (meV)": 1000 * m.hw, "B0 (GPa)": m.ea_par[0], "gamma": m.gamma,
                      "LOCO R2": r2_score(lg.target, p), "LOCO MAE": mean_absolute_error(lg.target, p),
                      "LGSSPSBrO pairs (of 136)": pairs(m.predict(bro), exp)})
-    return {"table_s8": pd.DataFrame(rows)}
+    return {"table_s9": pd.DataFrame(rows)}
 
 
-def table_s9(s1, em, lg, th, lgssps, bro):
+def table_s8(s1, em, lg, th, lgssps, bro):
     rows = []
     for c, g in lg.groupby("comp"):
         idx = g.index.values
@@ -230,7 +230,7 @@ def table_s9(s1, em, lg, th, lgssps, bro):
     pooled = np.sqrt((S.groupby("comp")["log10 sigma25"].var(ddof=1) * dof).sum() / dof.sum())
     t = pd.concat([t, pd.DataFrame([{"composition": "pooled within-composition SD", "sd_log10": pooled,
                                      "max/min": 10 ** pooled}])])
-    return {"table_s9": t}
+    return {"table_s8": t}
 
 
 def pooled_families(s1, em, lg, th, lgssps, bro):
@@ -273,12 +273,12 @@ def calibration(s1, em, lg, th, lgssps, bro):
 
 
 def structures(s1, *_):
-    return {"table_s6": structure.table_s6(s1), "fig_s11b_reference_volumes": structure.reference_volumes(s1),
+    return {"table_s2": structure.table_s2(s1), "fig_s3b_reference_volumes": structure.reference_volumes(s1),
             "li_sites": structure.li_site_correlations(s1, data.li_sites())}
 
 
-TASKS = {"eps": eps_results, "sigma": sigma_results, "table_s2": lambda *a: table_s2(), "table_s4": table_s4,
-         "table_s5": table_s5, "entropy": lgssps_bro_entropy, "table_s6": structures, "table_s7": table_s7,
+TASKS = {"eps": eps_results, "sigma": sigma_results, "table_s2": structures, "table_s3": lambda *a: table_s3(),
+         "table_s5": table_s5, "table_s6": table_s6, "entropy": lgssps_bro_entropy, "table_s7": table_s7,
          "table_s8": table_s8, "table_s9": table_s9, "pooled": pooled_families, "calibration": calibration}
 
 
