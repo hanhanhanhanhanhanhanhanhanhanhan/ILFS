@@ -138,6 +138,7 @@ def table_s6(s1, em, lg, th, lgssps, bro):
         {"model": "sigma-predictor, uniform shift (Si anchor)", **ranking(shift[o], exp[o]),
          "slope per pp eps_p": slope(shift)},
         {"model": "MLP", **ranking(mlp, exp)},
+        {"model": "MLP, 16 non-anchor", **ranking(mlp[o], exp[o]), "slope per pp eps_p": slope(mlp)},
         {"model": "MLP, uniform shift (Si anchor)", **ranking(mlp_shift[o], exp[o]),
          "slope per pp eps_p": slope(mlp_shift)}])
     return {"table_s6": t, "table_s6_stats": st}
