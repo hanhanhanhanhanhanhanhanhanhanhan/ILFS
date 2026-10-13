@@ -22,6 +22,7 @@ Results are written to `results/`.
 | Task | Results |
 |---|---|
 | `eps` | ε-predictor (Fig. S5), Table S4, ε_p ranges |
+| `vegard` | Comparison with Vegard's law |
 | `sigma` | Table 1, σ-predictor performance (Fig. S7) |
 | `table_s2` | Table S2, Fig. S3, Li-site correlations |
 | `table_s3` | Table S3 |

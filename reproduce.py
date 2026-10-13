@@ -10,7 +10,7 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.model_selection import LeaveOneGroupOut
 
 from ilfs import benchmarks as B
-from ilfs import data, eps_predictor, structure
+from ilfs import data, eps_predictor, structure, vegard
 from ilfs.constants import DFT_B, DFT_G, EPS_INPUTS, G, KB, LGSSPS, LGSSPSBRO, T25
 from ilfs.metrics import pairs, ranking, regression
 from ilfs.sigma_predictor import SigmaPredictor, ThioSigmaPredictor, arrhenius_table, debye_energy, effective_b0, \
@@ -272,14 +272,21 @@ def calibration(s1, em, lg, th, lgssps, bro):
     return {"calibration_all_anchors": t, "calibration_summary": summary.reset_index()}
 
 
+def vegard_comparison(s1, em, lg, th, lgssps, bro):
+    g = vegard.lgps_structures(s1)
+    return {"vegard_ge_sn": vegard.ge_sn_series(g), "vegard_linear_composition": vegard.linear_composition(g),
+            "vegard_lgssps": vegard.lgssps_ternary(g, lgssps, eps_predictor.predict(em, "LGPS-type", lgssps))}
+
+
 def structures(s1, *_):
     return {"table_s2": structure.table_s2(s1), "fig_s3b_reference_volumes": structure.reference_volumes(s1),
             "li_sites": structure.li_site_correlations(s1, data.li_sites())}
 
 
-TASKS = {"eps": eps_results, "sigma": sigma_results, "table_s2": structures, "table_s3": lambda *a: table_s3(),
-         "table_s5": table_s5, "table_s6": table_s6, "entropy": lgssps_bro_entropy, "table_s7": table_s7,
-         "table_s8": table_s8, "table_s9": table_s9, "pooled": pooled_families, "calibration": calibration}
+TASKS = {"eps": eps_results, "vegard": vegard_comparison, "sigma": sigma_results, "table_s2": structures,
+         "table_s3": lambda *a: table_s3(), "table_s5": table_s5, "table_s6": table_s6, "entropy": lgssps_bro_entropy,
+         "table_s7": table_s7, "table_s8": table_s8, "table_s9": table_s9, "pooled": pooled_families,
+         "calibration": calibration}
 
 
 def main():
